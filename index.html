@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community Notice Board</title>
+  <title>Community Notice Board - Project B</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     body { background: #f5f7fa; color: #333; }
     header { background: #4a90e2; color: white; padding: 20px; text-align: center; }
     header h1 { font-size: 28px; }
     .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
-    .add-btn { background: #4a90e2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; margin-bottom: 20px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .add-btn { background: #4a90e2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; }
     .add-btn:hover { background: #357ABD; }
+    .filters button { background: white; border: 1px solid #4a90e2; color: #4a90e2; padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-right: 8px; }
+    .filters button.active { background: #4a90e2; color: white; }
     .notice { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .notice h3 { color: #4a90e2; margin-bottom: 10px; }
+    .notice h3 { color: #4a90e2; margin-bottom: 5px; }
+    .notice .category { background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
     .notice p { line-height: 1.6; }
+    .notice .contact { font-size: 14px; color: #555; margin-top: 8px; }
     .notice .date { font-size: 12px; color: #888; margin-top: 10px; }
 
     /* Popup */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: white; margin: 10% auto; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; }
+    .modal-content { background: white; margin: 5% auto; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; }
     .modal-content h2 { margin-bottom: 15px; color: #4a90e2; }
-    .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+    .modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
     .modal-content button { background: #4a90e2; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; }
     .modal-content button:hover { background: #357ABD; }
     .close { float: right; font-size: 24px; cursor: pointer; color: #888; }
@@ -33,14 +38,18 @@
   </header>
 
   <div class="container">
-    <button class="add-btn" onclick="openModal()">+ Add Notice</button>
-    <div id="noticeList">
-      <div class="notice">
-        <h3>Welcome!</h3>
-        <p>This is your community notice board. Click "+ Add Notice" to post something new.</p>
-        <div class="date">Posted today</div>
+    <div class="top-bar">
+      <button class="add-btn" onclick="openModal()">+ Add Notice</button>
+      <div class="filters">
+        <button class="active" onclick="filterNotices('All')">All</button>
+        <button onclick="filterNotices('Event')">Event</button>
+        <button onclick="filterNotices('For Sale')">For Sale</button>
+        <button onclick="filterNotices('Lost & Found')">Lost & Found</button>
+        <button onclick="filterNotices('Help Needed')">Help Needed</button>
       </div>
     </div>
+
+    <div id="noticeList"></div>
   </div>
 
   <!-- Popup Modal -->
@@ -48,13 +57,24 @@
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
       <h2>Add New Notice</h2>
-      <input type="text" id="noticeTitle" placeholder="Notice Title">
-      <textarea id="noticeMessage" rows="4" placeholder="Write your message here..."></textarea>
+      <input type="text" id="noticeTitle" placeholder="Notice Title" required>
+      <select id="noticeCategory">
+        <option value="">Select Category</option>
+        <option value="Event">Event</option>
+        <option value="For Sale">For Sale</option>
+        <option value="Lost & Found">Lost & Found</option>
+        <option value="Help Needed">Help Needed</option>
+      </select>
+      <textarea id="noticeMessage" rows="4" placeholder="Description" required></textarea>
+      <input type="text" id="noticeContact" placeholder="Contact: Phone or Email" required>
       <button onclick="addNotice()">Post Notice</button>
     </div>
   </div>
 
   <script>
+    let notices = [];
+    let currentFilter = 'All';
+
     function openModal() {
       document.getElementById('noticeModal').style.display = 'block';
     }
@@ -63,23 +83,52 @@
     }
     function addNotice() {
       const title = document.getElementById('noticeTitle').value;
+      const category = document.getElementById('noticeCategory').value;
       const message = document.getElementById('noticeMessage').value;
-      if(title === '' || message === '') {
-        alert('Please fill both fields!');
+      const contact = document.getElementById('noticeContact').value;
+      
+      if(title === '' || category === '' || message === '' || contact === '') {
+        alert('Please fill all fields!');
         return;
       }
-      const noticeList = document.getElementById('noticeList');
-      const newNotice = document.createElement('div');
-      newNotice.classList.add('notice');
-      newNotice.innerHTML = `
-        <h3>${title}</h3>
-        <p>${message}</p>
-        <div class="date">Posted just now</div>
-      `;
-      noticeList.prepend(newNotice);
+      
+      const newNotice = { title, category, message, contact, date: 'Just now' };
+      notices.unshift(newNotice);
+      renderNotices();
+      
       document.getElementById('noticeTitle').value = '';
+      document.getElementById('noticeCategory').value = '';
       document.getElementById('noticeMessage').value = '';
+      document.getElementById('noticeContact').value = '';
       closeModal();
+    }
+    function renderNotices() {
+      const noticeList = document.getElementById('noticeList');
+      noticeList.innerHTML = '';
+      const filtered = currentFilter === 'All' ? notices : notices.filter(n => n.category === currentFilter);
+      
+      if(filtered.length === 0) {
+        noticeList.innerHTML = '<p style="text-align:center; color:#888;">No notices found</p>';
+        return;
+      }
+      
+      filtered.forEach(n => {
+        noticeList.innerHTML += `
+          <div class="notice">
+            <h3>${n.title}</h3>
+            <span class="category">${n.category}</span>
+            <p>${n.message}</p>
+            <div class="contact">📞 Contact: ${n.contact}</div>
+            <div class="date">Posted: ${n.date}</div>
+          </div>
+        `;
+      });
+    }
+    function filterNotices(category) {
+      currentFilter = category;
+      document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderNotices();
     }
     window.onclick = function(event) {
       if (event.target == document.getElementById('noticeModal')) {
