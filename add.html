@@ -1,36 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Notice</title>
-    <style>
-        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
-        form { background: white; padding: 20px; border-radius: 5px; max-width: 500px; }
-        input, textarea, select { width: 100%; padding: 8px; margin: 8px 0; }
-        button { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Notice Board</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #f5f5f5; padding: 20px; }
+    .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { color: #2c3e50; }
+    .add-btn { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .add-btn:hover { background: #2980b9; }
+    .filters { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    .notice-list { display: grid; gap: 15px; }
+    .notice { background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db; }
+    .notice h3 { color: #2c3e50; margin-bottom: 10px; }
+    .notice p { color: #555; line-height: 1.6; }
+    .notice .meta { font-size: 12px; color: #888; margin-top: 10px; }
+
+    /* Popup Form */
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+    .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; z-index: 1000; }
+    .popup h2 { margin-bottom: 15px; }
+    .popup input, .popup textarea, .popup select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+    .popup button { padding: 10px 20px; margin-right: 10px; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-post { background: #27ae60; color: white; }
+    .btn-cancel { background: #95a5a6; color: white; }
+  </style>
 </head>
 <body>
-    <h1>Post a New Notice</h1>
-    <form method="POST">
-        <label>Title:</label>
-        <input type="text" name="title" required>
-        
-        <label>Category:</label>
-        <select name="category" required>
-            {% for cat in categories %}
-            <option value="{{cat}}">{{cat}}</option>
-            {% endfor %}
-        </select>
-        
-        <label>Description:</label>
-        <textarea name="description" rows="4" required></textarea>
-        
-        <label>Contact:</label>
-        <input type="text" name="contact" placeholder="Phone or Email" required>
-        
-        <button type="submit">Submit Notice</button>
-    </form>
+
+  <div class="header">
+    <h1>📢 Community Notice Board</h1>
+    <button class="add-btn" onclick="openForm()">+ Add Notice</button>
+  </div>
+
+  <div class="filters">
+    <label>Filter by Category: </label>
+    <select id="categoryFilter" onchange="filterNotices()">
+      <option value="All">All Categories</option>
+      <option value="General">General</option>
+      <option value="Event">Event</option>
+      <option value="Important">Important</option>
+    </select>
+  </div>
+
+  <div class="notice-list" id="noticeList">
+    <div class="notice" data-category="General">
+      <h3>Notice #1</h3>
+      <p>Welcome to the Community Notice Board! This is a sample notice.</p>
+      <div class="meta">Posted on: 26 July 2026 | Category: General</div>
+    </div>
+    <div class="notice" data-category="Event">
+      <h3>Notice #2</h3>
+      <p>Community meeting this Sunday at 5 PM in the main hall.</p>
+      <div class="meta">Posted on: 26 July 2026 | Category: Event</div>
+    </div>
+    <div class="notice" data-category="Important">
+      <h3>Notice #3</h3>
+      <p>Water supply will be shut down tomorrow from 10 AM to 2 PM.</p>
+      <div class="meta">Posted on: 26 July 2026 | Category: Important</div>
+    </div>
+  </div>
+
+  <!-- Popup Form -->
+  <div class="overlay" id="overlay" onclick="closeForm()"></div>
+  <div class="popup" id="popup">
+    <h2>New Notice</h2>
+    <input type="text" id="title" placeholder="Enter Title">
+    <textarea id="message" placeholder="Enter Message" rows="4"></textarea>
+    <select id="category">
+      <option value="General">General</option>
+      <option value="Event">Event</option>
+      <option value="Important">Important</option>
+    </select>
     <br>
-    <a href="/">← Back to Home</a>
+    <button class="btn-post" onclick="addNotice()">Post Notice</button>
+    <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+  </div>
+
+  <script>
+    function openForm() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('popup').style.display = 'block';
+    }
+    function closeForm() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('popup').style.display = 'none';
+    }
+    function addNotice() {
+      let title = document.getElementById('title').value;
+      let message = document.getElementById('message').value;
+      let category = document.getElementById('category').value;
+      
+      if(title === "" || message === "") {
+        alert("Please fill all fields");
+        return;
+      }
+
+      let noticeList = document.getElementById('noticeList');
+      let newNotice = document.createElement('div');
+      newNotice.className = 'notice';
+      newNotice.setAttribute('data-category', category);
+      newNotice.innerHTML = `
+        <h3>${title}</h3>
+        <p>${message}</p>
+        <div class="meta">Posted on: ${new Date().toLocaleDateString()} | Category: ${category}</div>
+      `;
+      noticeList.prepend(newNotice);
+      
+      document.getElementById('title').value = "";
+      document.getElementById('message').value = "";
+      closeForm();
+      alert("Notice Posted Successfully!");
+    }
+    function filterNotices() {
+      let filter = document.getElementById('categoryFilter').value;
+      let notices = document.querySelectorAll('.notice');
+      notices.forEach(notice => {
+        if(filter === "All" || notice.getAttribute('data-category') === filter) {
+          notice.style.display = 'block';
+        } else {
+          notice.style.display = 'none';
+        }
+      });
+    }
+  </script>
+
 </body>
 </html>
