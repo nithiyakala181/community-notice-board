@@ -1,80 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Notice Board</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', Arial; 
-            margin: 20px; 
-            background: #f4f7f9; 
-            max-width: 900px; 
-            margin: 20px auto;
-            padding: 20px;
-        }
-        h1 { color: #333; text-align: center; }
-        .btn { 
-            background: #007bff; 
-            color: white; 
-            padding: 12px 20px; 
-            text-decoration: none; 
-            border-radius: 8px; 
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        .btn:hover { background: #0056b3; }
-        .filter { margin: 20px 0; text-align: center; }
-        .filter a { 
-            margin-right: 10px; 
-            padding: 8px 15px; 
-            background: #ddd; 
-            text-decoration: none; 
-            border-radius: 6px; 
-            color: #333;
-        }
-        .filter a.active { background: #28a745; color: white; }
-        .notice { 
-            background: white; 
-            padding: 20px; 
-            margin: 15px 0; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-left: 6px solid #007bff;
-            transition: 0.3s;
-        }
-        .notice:hover { transform: translateY(-3px); }
-        .category { font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Notice Board</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #f5f7fa; color: #333; }
+    header { background: #4a90e2; color: white; padding: 20px; text-align: center; }
+    header h1 { font-size: 28px; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    .add-btn { background: #4a90e2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; margin-bottom: 20px; }
+    .add-btn:hover { background: #357ABD; }
+    .notice { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .notice h3 { color: #4a90e2; margin-bottom: 10px; }
+    .notice p { line-height: 1.6; }
+    .notice .date { font-size: 12px; color: #888; margin-top: 10px; }
+
+    /* Popup */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: white; margin: 10% auto; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; }
+    .modal-content h2 { margin-bottom: 15px; color: #4a90e2; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+    .modal-content button { background: #4a90e2; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; }
+    .modal-content button:hover { background: #357ABD; }
+    .close { float: right; font-size: 24px; cursor: pointer; color: #888; }
+  </style>
 </head>
 <body>
-    <h1>📢 Community Notice Board</h1>
-    <a href="/new" class="btn">+ Add New Notice</a>
+  <header>
+    <h1>Community Notice Board</h1>
+  </header>
 
-    <div class="filter">
-        <a href="/" class="{% if selected == 'All' %}active{% endif %}">All</a>
-        {% for cat in categories %}
-        <a href="/?category={{ cat }}" class="{% if selected == cat %}active{% endif %}">{{ cat }}</a>
-        {% endfor %}
+  <div class="container">
+    <button class="add-btn" onclick="openModal()">+ Add Notice</button>
+    <div id="noticeList">
+      <div class="notice">
+        <h3>Welcome!</h3>
+        <p>This is your community notice board. Click "+ Add Notice" to post something new.</p>
+        <div class="date">Posted today</div>
+      </div>
     </div>
+  </div>
 
-    {% for notice in notices %}
-    <div class="notice" style="border-left-color: 
-    {% if notice.category == 'Lost and Found' %}#dc3545
-    {% elif notice.category == 'Event' %}#28a745
-    {% elif notice.category == 'For Sale' %}#fd7e14
-    {% else %}#6f42c1{% endif %}">
-
-        <h3>{{ notice.title }}</h3>
-        <p><span class="category">{{ notice.category }}</span></p>
-        <p>{{ notice.description }}</p>
-        <p><b>Contact:</b> {{ notice.contact }}</p>
-
+  <!-- Popup Modal -->
+  <div id="noticeModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Add New Notice</h2>
+      <input type="text" id="noticeTitle" placeholder="Notice Title">
+      <textarea id="noticeMessage" rows="4" placeholder="Write your message here..."></textarea>
+      <button onclick="addNotice()">Post Notice</button>
     </div>
-    {% endfor %}
+  </div>
 
-    {% if not notices %}
-    <p style="text-align: center; color: gray;">No notices found in this category.</p>
-    {% endif %}
-
+  <script>
+    function openModal() {
+      document.getElementById('noticeModal').style.display = 'block';
+    }
+    function closeModal() {
+      document.getElementById('noticeModal').style.display = 'none';
+    }
+    function addNotice() {
+      const title = document.getElementById('noticeTitle').value;
+      const message = document.getElementById('noticeMessage').value;
+      if(title === '' || message === '') {
+        alert('Please fill both fields!');
+        return;
+      }
+      const noticeList = document.getElementById('noticeList');
+      const newNotice = document.createElement('div');
+      newNotice.classList.add('notice');
+      newNotice.innerHTML = `
+        <h3>${title}</h3>
+        <p>${message}</p>
+        <div class="date">Posted just now</div>
+      `;
+      noticeList.prepend(newNotice);
+      document.getElementById('noticeTitle').value = '';
+      document.getElementById('noticeMessage').value = '';
+      closeModal();
+    }
+    window.onclick = function(event) {
+      if (event.target == document.getElementById('noticeModal')) {
+        closeModal();
+      }
+    }
+  </script>
 </body>
 </html>
