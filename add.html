@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Notice</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        form { background: white; padding: 20px; border-radius: 5px; max-width: 500px; }
+        input, textarea, select { width: 100%; padding: 8px; margin: 8px 0; }
+        button { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Post a New Notice</h1>
+    <form method="POST">
+        <label>Title:</label>
+        <input type="text" name="title" required>
+        
+        <label>Category:</label>
+        <select name="category" required>
+            {% for cat in categories %}
+            <option value="{{cat}}">{{cat}}</option>
+            {% endfor %}
+        </select>
+        
+        <label>Description:</label>
+        <textarea name="description" rows="4" required></textarea>
+        
+        <label>Contact:</label>
+        <input type="text" name="contact" placeholder="Phone or Email" required>
+        
+        <button type="submit">Submit Notice</button>
+    </form>
+    <br>
+    <a href="/">← Back to Home</a>
+</body>
+</html>

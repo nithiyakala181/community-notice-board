@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notice Board</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial; 
+            margin: 20px; 
+            background: #f4f7f9; 
+            max-width: 900px; 
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 { color: #333; text-align: center; }
+        .btn { 
+            background: #007bff; 
+            color: white; 
+            padding: 12px 20px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .btn:hover { background: #0056b3; }
+        .filter { margin: 20px 0; text-align: center; }
+        .filter a { 
+            margin-right: 10px; 
+            padding: 8px 15px; 
+            background: #ddd; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            color: #333;
+        }
+        .filter a.active { background: #28a745; color: white; }
+        .notice { 
+            background: white; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 6px solid #007bff;
+            transition: 0.3s;
+        }
+        .notice:hover { transform: translateY(-3px); }
+        .category { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>📢 Community Notice Board</h1>
+    <a href="/new" class="btn">+ Add New Notice</a>
+
+    <div class="filter">
+        <a href="/" class="{% if selected == 'All' %}active{% endif %}">All</a>
+        {% for cat in categories %}
+        <a href="/?category={{ cat }}" class="{% if selected == cat %}active{% endif %}">{{ cat }}</a>
+        {% endfor %}
+    </div>
+
+    {% for notice in notices %}
+    <div class="notice" style="border-left-color: 
+    {% if notice.category == 'Lost and Found' %}#dc3545
+    {% elif notice.category == 'Event' %}#28a745
+    {% elif notice.category == 'For Sale' %}#fd7e14
+    {% else %}#6f42c1{% endif %}">
+
+        <h3>{{ notice.title }}</h3>
+        <p><span class="category">{{ notice.category }}</span></p>
+        <p>{{ notice.description }}</p>
+        <p><b>Contact:</b> {{ notice.contact }}</p>
+
+    </div>
+    {% endfor %}
+
+    {% if not notices %}
+    <p style="text-align: center; color: gray;">No notices found in this category.</p>
+    {% endif %}
+
+</body>
+</html>
