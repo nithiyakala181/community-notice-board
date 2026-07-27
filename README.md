@@ -21,5 +21,7 @@
  Live Demo
 [https://nithiyakala181.github.io/community-notice-board/](https://nithiyakala181.github.io/community-notice-board/)
 
- Author
+video
+[Click here to watch demo video] (demo.mp4)
+author
 Nithiyakala
