@@ -18,8 +18,11 @@
 3. Click `Post Notice` to add it to the board
 4. Use filter buttons to view specific category notices
 
- Live Demo
+ Live example
 [https://nithiyakala181.github.io/community-notice-board/](https://nithiyakala181.github.io/community-notice-board/)
+
+demo video
+Watch here:[Click to watch on youtube] (https://youtu.be/w7Oc8SHmmIw) and (https://youtu.be/KRdKGPaD5PQ)
 
 author
 Nithiyakala
